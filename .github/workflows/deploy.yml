@@ -1,0 +1,66 @@
+name: CI/CD Deploy to Server
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Optional: put your CI checks here (tests/build). Remove if not needed.
+      - name: CI checks
+        run: |
+          echo "Add your tests/build here"
+          # Example Node:
+          # npm ci
+          # npm test
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}          # e.g. 13.60.242.219
+          username: ${{ secrets.SSH_USER }}      # e.g. ubuntu or deploy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # port: ${{ secrets.SSH_PORT }}        # only if you use non-22 SSH port
+          script: |
+            set -e
+
+            echo "✅ Connected to server: $(hostname)"
+            echo "➡ Deploying latest code..."
+
+            # CHANGE THIS to your project folder on the server
+            APP_DIR="/var/www/myapp"
+
+            cd "$APP_DIR"
+
+            # Make sure correct branch is deployed
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "✅ Code updated"
+
+            # ===========================
+            # RESTART YOUR APP (choose 1)
+            # ===========================
+
+            # Option A) systemd service (recommended)
+            # sudo systemctl restart myapp
+
+            # Option B) Docker Compose
+            # docker compose up -d --build
+
+            # Option C) Python/Flask with pm2 (less common but works)
+            # pm2 restart myapp
+
+            echo "🚀 Deploy finished"
