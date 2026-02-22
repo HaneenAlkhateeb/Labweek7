@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Order Price Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .card { max-width: 560px; padding: 18px; border: 1px solid #ddd; border-radius: 10px; }
+    label { display:block; margin-top: 10px; }
+    input, select { width: 100%; padding: 8px; margin-top: 6px; }
+    button { margin-top: 14px; padding: 10px 14px; cursor: pointer; }
+    .result { margin-top: 16px; padding: 12px; background: #f6f6f6; border-radius: 8px; }
+    code { background: #eee; padding: 2px 6px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Order Price Calculator (UML Demo)</h2>
+    <p>Small UI for CI/CD lab: push code → pipeline runs tests → app works.</p>
+
+    <form method="post" action="/calculate">
+      <label>Customer name</label>
+      <input name="customer_name" value="Ali" />
+
+      <label>Discount rate (example 0.10 = 10%)</label>
+      <input name="discount_rate" value="0.10" />
+
+      <label>Product</label>
+      <select name="product_name">
+        {% for name, price in products.items() %}
+          <option value="{{name}}">{{name}} - ${{"%.2f"|format(price)}}</option>
+        {% endfor %}
+      </select>
+
+      <label>Quantity</label>
+      <input name="quantity" type="number" min="1" value="1" />
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    {% if result %}
+    <div class="result">
+      <b>Result</b><br/>
+      Customer: {{result.customer}}<br/>
+      Item: {{result.product}} × {{result.qty}}<br/>
+      Base: ${{"%.2f"|format(result.base)}}<br/>
+      Discount: ${{"%.2f"|format(result.discount)}} (rate {{result.rate}})<br/>
+      <b>Final: ${{"%.2f"|format(result.final)}}</b>
+    </div>
+    {% endif %}
+
+    <p style="margin-top:14px;">
+      Run locally: <code>python app.py</code> then open <code>http://localhost:5000</code>
+    </p>
+  </div>
+</body>
+</html>
